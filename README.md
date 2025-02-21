@@ -8,8 +8,9 @@
 
 ✅ [**Qdrant**](https://qdrant.tech/) 
 
-✅ [**PostgreSQL**](https://www.postgresql.org/) 
-✅ [**Open WebUi**](https://docs.openwebui.com/)) 
+✅ [**PostgreSQL**](https://www.postgresql.org/)
+
+✅ [**Open WebUi**](https://docs.openwebui.com/)
 
 
 ### Running n8n using Docker Compose
