@@ -3,7 +3,6 @@ volumes:
   postgres_storage:
   ollama_storage:
   qdrant_storage:
-  ollama:
   open-webui:
 
 networks:
@@ -158,5 +157,5 @@ services:
     ports:
       - "3000:8080"
     volumes:
-      - ollama:/root/.ollama
+      - ollama_storage:/root/.ollama
       - open-webui:/app/backend/data
