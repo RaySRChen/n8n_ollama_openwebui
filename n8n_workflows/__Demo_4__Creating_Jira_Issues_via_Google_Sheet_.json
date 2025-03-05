@@ -1,0 +1,454 @@
+{
+  "name": "*[Demo 4] 新增 Jira 議題 (從 Google Sheet)",
+  "nodes": [
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "sheetUrl",
+              "stringValue": "https://docs.google.com/spreadsheets/d/1eNaJbWfsxol2pZAgkILuvwjK3ccKf42eNkiyzcqX2oM/edit?gid=272756938#gid=272756938"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "78a3e054-6897-4fc2-a0f1-0863df7d3bf6",
+      "name": "Set Google Sheet URL",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        780,
+        140
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "ray7711231@gmail.com",
+        "subject": "Create Jira Approval",
+        "message": "=親愛的用戶，您好：\n\n您有一筆新增Jira 議題工作待確認，請確認是否新增!\n\"\"\"\n {{ $json['Jira Title'] }}\n\"\"\"\n若您有任何疑問，請回覆此郵件或聯繫系統管理員。  \n\n感謝您的確認！\n",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        620,
+        420
+      ],
+      "id": "6a111470-f3f8-4a1a-b932-26d2cbd15369",
+      "name": "Gmail",
+      "webhookId": "4f28d47b-21c5-4c5e-9fb3-db5ced56ba0c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "25N5tY6SsBfBYiZm",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 抓取Google Sheet 資料並生成 Jira 議題內容",
+        "height": 267,
+        "width": 940
+      },
+      "id": "2d7f721e-d7ec-4b69-9298-9dc16d01123f",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        580,
+        60
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## Gmail (HITL) & 新增 Jira 議題\n",
+        "height": 347,
+        "width": 940,
+        "color": 4
+      },
+      "id": "d87678ac-6f3e-409d-bfb9-4f3217210e3c",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        580,
+        340
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "={{ $json.sheetUrl }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "url",
+          "value": "={{ $json.sheetUrl }}"
+        },
+        "options": {}
+      },
+      "id": "2643bc5f-bd98-47af-82e1-486e5d9595ce",
+      "name": "Get Google sheet contents",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        940,
+        140
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4i3yfXEEXjMUcjKX",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        600,
+        140
+      ],
+      "id": "bf84362d-d282-496a-bb57-26eb2bf4cc51",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.data.approved }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Check HITL Result",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        940,
+        420
+      ],
+      "id": "fde67b24-80ad-419d-9e0f-19d52c3699fd"
+    },
+    {
+      "parameters": {
+        "project": {
+          "__rl": true,
+          "value": "10003",
+          "mode": "list",
+          "cachedResultName": "IST軟體開發"
+        },
+        "issueType": {
+          "__rl": true,
+          "value": "10013",
+          "mode": "list",
+          "cachedResultName": "測試"
+        },
+        "summary": "={{ $json['Jira Title'] }}",
+        "additionalFields": {
+          "assignee": {
+            "__rl": true,
+            "value": "712020:efa935c4-b066-4fd5-8681-344a1d14f4df",
+            "mode": "list",
+            "cachedResultName": "Ray_Chen"
+          },
+          "description": "={{ $json.Note }}",
+          "componentIds": [
+            "10020"
+          ],
+          "labels": [
+            "Indicator"
+          ],
+          "parentIssueKey": "10518",
+          "priority": {
+            "__rl": true,
+            "value": "2",
+            "mode": "list",
+            "cachedResultName": "High"
+          },
+          "reporter": {
+            "__rl": true,
+            "value": "712020:efa935c4-b066-4fd5-8681-344a1d14f4df",
+            "mode": "list",
+            "cachedResultName": "Ray_Chen"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.jira",
+      "typeVersion": 1,
+      "position": [
+        1180,
+        360
+      ],
+      "id": "26a07ce7-6844-40c3-aa48-7f6be3cc4c72",
+      "name": "Jira Software",
+      "alwaysOutputData": false,
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "HIDDs6fjevkBrVUI",
+          "name": "Jira SW Cloud account_Main"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "Gmail HITL",
+              "stringValue": "={{ $('Gmail').item.json.data.approved }}"
+            }
+          ]
+        },
+        "include": "none",
+        "options": {}
+      },
+      "id": "28b88d0c-1785-4619-b5f6-9eb769acf6cf",
+      "name": "HITL Decline",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1180,
+        540
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "Jira HITL",
+              "stringValue": "={{ $('Gmail').item.json.data.approved }}"
+            }
+          ]
+        },
+        "include": "none",
+        "options": {}
+      },
+      "id": "97086781-46fd-495e-8f7f-221836913eb8",
+      "name": "Jira Result",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1340,
+        360
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "Jira Title",
+              "stringValue": "={{ $json['Jira Title'] }}"
+            },
+            {
+              "name": "Note",
+              "stringValue": "={{ $json['Ray\\'s Narrate'] }}"
+            }
+          ]
+        },
+        "include": "none",
+        "options": {}
+      },
+      "id": "4e029876-df72-40f1-82f2-a6f57ab82121",
+      "name": "Prepare Jira data",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1340,
+        140
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        780,
+        420
+      ],
+      "id": "5a53f3b6-9d5a-4e69-a395-41671d53717e",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "bf712098-97e4-42cb-8e08-2ee32d19d3e7",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json['NO.'] }}",
+              "rightValue": "=27"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "looseTypeValidation": true
+        }
+      },
+      "id": "f852d958-d4c0-4cf9-b921-5c744813816b",
+      "name": "Filter_Sprint (User Input)",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        1140,
+        140
+      ],
+      "typeVersion": 2,
+      "alwaysOutputData": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Set Google Sheet URL": {
+      "main": [
+        [
+          {
+            "node": "Get Google sheet contents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get Google sheet contents": {
+      "main": [
+        [
+          {
+            "node": "Filter_Sprint (User Input)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Set Google Sheet URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check HITL Result": {
+      "main": [
+        [
+          {
+            "node": "Jira Software",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HITL Decline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Jira Software": {
+      "main": [
+        [
+          {
+            "node": "Jira Result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Prepare Jira data": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Check HITL Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter_Sprint (User Input)": {
+      "main": [
+        [
+          {
+            "node": "Prepare Jira data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e9366e8d-b816-48fb-971c-fca07489f7b0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "id": "bKF06WuzgTMyCfPg",
+  "tags": []
+}

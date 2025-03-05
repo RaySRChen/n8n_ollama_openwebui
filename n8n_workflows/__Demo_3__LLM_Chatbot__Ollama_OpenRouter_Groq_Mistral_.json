@@ -1,0 +1,431 @@
+{
+  "name": "*[Demo 3] LLM Chatbot (Ollama/OpenRouter/Groq/Mistral)",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -480,
+        -140
+      ],
+      "id": "1fc6c629-f320-4c88-97b1-031e52e2d3ec",
+      "name": "When chat message received",
+      "webhookId": "553832b0-b77b-4634-b731-3af85c327c4a"
+    },
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "httpMethod": [
+          "POST"
+        ],
+        "path": "n8n_agent",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -480,
+        80
+      ],
+      "id": "9c7c86a0-ba8b-43c3-80b5-de9af17862b7",
+      "name": "Webhook",
+      "webhookId": "1b9407b4-f152-47a1-a7bf-8dcd4238c017"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        460,
+        120
+      ],
+      "id": "188eb0c3-f4f5-4aad-9ae1-cf8468266907",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "75ebfdef-c8e2-4c3e-b716-1479d0cc2a73",
+              "name": "chatInput",
+              "value": "={{ $json?.chatInput || $json?.body?.chatInput || $json.query?.chatInput }}",
+              "type": "string"
+            },
+            {
+              "id": "59b7a20f-0626-4861-93e2-015d430c266e",
+              "name": "sessionId",
+              "value": "={{ $json?.sessionId || $json?.body?.sessionId || $json.query?.sessionId}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "908b0902-d85f-40fa-807b-103af66e6642",
+      "name": "Select msg",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -220,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        460,
+        -120
+      ],
+      "id": "bdfc392f-0244-4770-b3d8-c00d12abc8c7",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "75ebfdef-c8e2-4c3e-b716-1479d0cc2a73",
+              "name": "output",
+              "value": "={{ $json.output }}\n",
+              "type": "string"
+            },
+            {
+              "id": "ac6c9a95-7597-4841-b7a7-74e6166e9307",
+              "name": "sessionId",
+              "value": "={{ $('Select msg').item.json.sessionId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "48b3277b-35e0-4e09-85d2-6dc8d384486c",
+      "name": "output msg",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        640,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {\n  output: $json[\"output\"] ? $json[\"output\"].replace(/<think>.*<\\/think>/s, \"\").trim() : \"\"\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        -60
+      ],
+      "id": "9b43accd-2c21-46b9-ae20-e3931a1e94d3",
+      "name": "Filter text"
+    },
+    {
+      "parameters": {
+        "model": "deepseek-r1-distill-llama-70b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        280
+      ],
+      "id": "46f7d32b-7820-4b82-99c6-6dfea1a60a78",
+      "name": "Groq Chat Model (DeepSeek-R1)",
+      "credentials": {
+        "groqApi": {
+          "id": "Y9tH5RNkgIBo744I",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5:1.5b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -360,
+        280
+      ],
+      "id": "e33a605d-fdba-4e58-86f4-476063769bfc",
+      "name": "Ollama Chat Model (Qwen2.5)",
+      "credentials": {
+        "ollamaApi": {
+          "id": "xHuYe0MDGOs9IpBW",
+          "name": "Local Ollama service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 透過 n8n chat 或 Open WebUI 連線不同的 LLM (Ollama/APIs)\n",
+        "height": 647,
+        "width": 749,
+        "color": 5
+      },
+      "id": "9c466b91-838e-421a-ae1b-b2881b49acf0",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -220
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 格式化輸出 LLM 回應",
+        "height": 647,
+        "width": 569,
+        "color": 7
+      },
+      "id": "7e4099c5-9f1f-43fe-a4ff-d72e0c2cfd04",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -220
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -80,
+        -20
+      ],
+      "id": "62321e2f-7081-4bec-bf4f-9e959ff7a9f2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        40,
+        140
+      ],
+      "id": "261cec48-c825-4d8f-aaf7-5c22009477c4",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "IvMluK0SCBqWxx6F",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        140,
+        140
+      ],
+      "id": "4f518ee2-ad18-4df1-be53-631aa1fa9831",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        220
+      ],
+      "id": "5cc0b537-62f4-485c-9cfb-d9413cf37982",
+      "name": "OpenRouter Chat Model (4o-mini)",
+      "credentials": {
+        "openRouterApi": {
+          "id": "7p6mfWpMAxn4nSO6",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        20,
+        300
+      ],
+      "id": "e8393089-df9d-4fb2-8677-ae823a54dc9b",
+      "name": "Mistral Cloud Chat Model",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "bofYqYQ68seYjLZc",
+          "name": "Mistral Cloud account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Select msg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Select msg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select msg": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "output msg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "output msg": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter text": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model (DeepSeek-R1)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Filter text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mistral Cloud Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "Ollama Chat Model (Qwen2.5)": {
+      "ai_languageModel": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "936d31fb-9f92-4b4d-b0d3-04c8fe577bad",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "id": "smkMLB6pUnmNwtO0",
+  "tags": []
+}

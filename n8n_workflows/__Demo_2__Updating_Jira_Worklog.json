@@ -1,0 +1,803 @@
+{
+  "name": "*[Demo 2] 新增 Jira Worklog_v2",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "150eeccc-adc2-407b-a111-341df45f3d04",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2460,
+        580
+      ],
+      "webhookId": "6566c59c-1f75-4ef0-8151-1eeb1cd4a878"
+    },
+    {
+      "parameters": {
+        "model": "qwen-2.5-coder-32b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -1080,
+        460
+      ],
+      "id": "3a77031b-5312-48dd-92dc-8911fa0dc023",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "Y9tH5RNkgIBo744I",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.output.relevant }}",
+              "value2": "={{ true }}"
+            }
+          ]
+        }
+      },
+      "name": "Check Relevance",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -1600,
+        660
+      ],
+      "id": "879a5ccb-b438-4e48-9912-c9c50ee3ec7b"
+    },
+    {
+      "parameters": {
+        "model": "qwen-2.5-coder-32b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -1960,
+        960
+      ],
+      "id": "75291e06-77ae-4556-9a04-3066e9ef6009",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "Y9tH5RNkgIBo744I",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        -540,
+        920
+      ],
+      "id": "f256cca8-1801-4721-99ea-165fc0fb1e12",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "IvMluK0SCBqWxx6F",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "qwen-2.5-coder-32b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -740,
+        940
+      ],
+      "id": "1be7f90f-8fde-4075-b01c-36dbfd5d5269",
+      "name": "Groq Chat Model2",
+      "credentials": {
+        "groqApi": {
+          "id": "Y9tH5RNkgIBo744I",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "235d4760-abb8-42cb-92f8-ee22689c0cb3",
+              "name": "output",
+              "value": "=[Unknown input] \n{{ $json.output.message }}",
+              "type": "string"
+            },
+            {
+              "id": "05409264-737e-4791-8519-4742bb55bacc",
+              "name": "sessionId ",
+              "value": "={{ $('Edit Fields').item.json.sessionId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set Not Relevant",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1280,
+        980
+      ],
+      "id": "e11c1a6a-21ba-4fec-9d1b-0d4051248de5"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "n8n_worklog",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "f482b1fa-6f52-48d2-8b68-b6d5953f921e",
+      "name": "Webhook (open-webui)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -2460,
+        780
+      ],
+      "webhookId": "9116d146-b9a9-4ff5-8301-41b382ea2de6"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "75ebfdef-c8e2-4c3e-b716-1479d0cc2a73",
+              "name": "chatInput",
+              "value": "={{ $json?.chatInput || $json?.body?.chatInput || $json.query?.chatInput }}",
+              "type": "string"
+            },
+            {
+              "id": "59b7a20f-0626-4861-93e2-015d430c266e",
+              "name": "sessionId",
+              "value": "={{ $json?.sessionId || $json?.body?.sessionId || $json.query?.sessionId}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f2a199fd-e9af-4fdf-93b1-02f809683433",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2240,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"relevant\": true,\n\t\"message\": \"Related to Jira worklog.\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -1800,
+        920
+      ],
+      "id": "d55c1fbb-7028-4126-8249-e91dfb955d06",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "1d31dd0a-67b6-4368-80e9-c7ab26fbb0b1",
+      "name": "Respond to Webhook (open-webui)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -100,
+        1000
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c103d440-fe65-4745-a745-6d4ece6729e2",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "object"
+            },
+            {
+              "id": "c00bdb73-997f-4e30-8939-34f932ce9b9e",
+              "name": "chatInput",
+              "value": "={{ $('Basic LLM Chain').item.json.output.message }}",
+              "type": "string"
+            },
+            {
+              "id": "d4cbb0ac-9cf6-43aa-b758-38a18909a629",
+              "name": "sessionId",
+              "value": "={{ $('Edit Fields').item.json.sessionId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "dde963cb-dab6-4a8c-af4c-2287310821d7",
+      "name": "Set Relevant",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1280,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "235d4760-abb8-42cb-92f8-ee22689c0cb3",
+              "name": "output",
+              "value": "=Gmail Disapproval:\n{{ $('Set Relevant').item.json.output.message }}",
+              "type": "string"
+            },
+            {
+              "id": "05409264-737e-4791-8519-4742bb55bacc",
+              "name": "sessionId ",
+              "value": "={{ $('Edit Fields').item.json.sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "ba34d44c-e830-4ddb-a2e1-ae48a552963a",
+              "name": "data",
+              "value": "={{ $json.data.approved }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set Disapproval",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -100,
+        400
+      ],
+      "id": "3d4166a0-bfdb-4353-b8f0-30206e4a2ce9"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.data.approved }}",
+              "value2": "={{ true }}"
+            }
+          ]
+        }
+      },
+      "name": "Check Gmail Approval",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        120
+      ],
+      "id": "76b768d1-9583-4fe1-b0e3-28934ffde30f"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c103d440-fe65-4745-a745-6d4ece6729e2",
+              "name": "output",
+              "value": "=Update worklogs successfuly:\n{{ $json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "08d8f776-514f-49d8-bf40-347ce8ff55d9",
+              "name": "sessionId",
+              "value": "={{ $('Edit Fields').item.json.sessionId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f75f7828-2de7-4662-a92e-2c692f61049e",
+      "name": "Set Success Info",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -380,
+        780
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "authentication": "basicAuth",
+        "requestMethod": "POST",
+        "url": "={{ $('Basic LLM Chain2').item.json.output[0].url }}",
+        "jsonParameters": true,
+        "options": {
+          "bodyContentType": "json"
+        },
+        "bodyParametersJson": "={{ JSON.stringify($('Basic LLM Chain2').item.json.output[0].body) }}"
+      },
+      "name": "HTTP Request to Jira",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        -100,
+        100
+      ],
+      "id": "24eb4f32-f09a-4927-b6dc-670b5d97e5ad",
+      "alwaysOutputData": false,
+      "notesInFlow": false,
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "7bjKmwFdcZYXCs0e",
+          "name": "ray_jira credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "  你是一個專門將「使用者針對 Jira 工時需求的自然語言描述」轉成一段 JSON 的 AI。 請務必遵守以下規範：  1. 你需要在輸出 JSON 裏，同時包含 \"url\" 與 \"body\" 兩個鍵 (key)：    {      \"url\": \"<一個字串>\",      \"body\": { <工時記錄的 JSON 格式> }    }  2. \"url\" 欄位：對應 Jira 新增工時的 REST API，格式如：    \"https://istrd.atlassian.net/rest/api/3/issue/SWD-3677/worklog\"    其中最後的 \"SWD-3677\" 是issue key或ID，視使用者指令而定。  3. \"body\" 欄位：需是一個JSON物件，裡面包含    - timeSpent: string (ex: \"120m\", \"2h\")    - comment: ADF 格式，如下範例        {          \"type\": \"doc\",          \"version\": 1,          \"content\": [            {              \"type\": \"paragraph\",              \"content\": [                { \"type\": \"text\", \"text\": \"這裡是備註內容\" }              ]            }          ]        }    - started: string (ISO8601或帶時區，如 \"2025-02-14T15:00:00.000+0800\")  4. 範例輸出 (請只輸出 JSON，勿添加多餘說明)：    {      \"url\": \"https://istrd.atlassian.net/rest/api/3/issue/SWD-3677/worklog\",      \"body\": {        \"timeSpent\": \"120m\",        \"comment\": {          \"type\": \"doc\",          \"version\": 1,          \"content\": []        },        \"started\": \"2025-02-14T15:00:00.000+0800\"      }    }  5. 使用者可能會輸入「在 SWD-3677 上新增 120 分鐘工時…」之類要求，你就動態替換 \"SWD-3677\"、timeSpent、備註、started 等資訊。  請謹記：**只輸出 JSON，且必須包含 \"url\" 與 \"body\"**，並在 \"body\" 內至少包含上述三個主要欄位。"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        -1020,
+        140
+      ],
+      "id": "32dbfd9d-05ab-476f-ac61-96910ee03f5f",
+      "name": "Basic LLM Chain2",
+      "alwaysOutputData": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "[\n\t{\n\t\t\"url\": \"https://istrd.atlassian.net/rest/api/3/issue/SWD-3813/worklog\",\n\t\t\"body\": {\n\t\t\t\"timeSpent\": \"1h\",\n\t\t\t\"comment\": {\n\t\t\t\t\"type\": \"doc\",\n\t\t\t\t\"version\": 1,\n\t\t\t\t\"content\": [\n\t\t\t\t\t{\n\t\t\t\t\t\t\"type\": \"paragraph\",\n\t\t\t\t\t\t\"content\": [\n\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\t\"type\": \"text\",\n\t\t\t\t\t\t\t\t\"text\": \"撰寫BDD文件+實作\"\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t]\n\t\t\t\t\t}\n\t\t\t\t]\n\t\t\t},\n\t\t\t\"started\": \"2025-02-19T15:00:00.000+0800\"\n\t\t}\n\t}\n]"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -920,
+        460
+      ],
+      "id": "fa411dc6-fe74-48fe-8bdc-36562a0290ec",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful assistant designed to summarize work logs using bullet points.\n\nIf the input is relevant to a work log, it must contain the following information in this format:\n\nIssue ID\nWork Datetime (YYYY-MM-DD HH:MM:SS)\nWork Hours\nWork Summary\nIf there are any errors, summarize the failure information.\n\nDo not output any extra information."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -760,
+        780
+      ],
+      "id": "5e0286ff-87b6-4753-83e0-e079ab699f65",
+      "name": "AI Agent (Summary)",
+      "alwaysOutputData": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1368590-2b1e-4ed0-b21f-f00936304967",
+              "name": "chatInput",
+              "value": "={{ $('Set Relevant').item.json.chatInput }}",
+              "type": "string"
+            },
+            {
+              "id": "08d8f776-514f-49d8-bf40-347ce8ff55d9",
+              "name": "sessionId",
+              "value": "={{ $('Edit Fields').item.json.sessionId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2474a86a-d5d4-4be5-a694-4eed29d39ee7",
+      "name": "Set Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -920,
+        780
+      ]
+    },
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "你是一位工作時數（worklog）專家。請判斷使用者的意圖是否與新增 Jira 工作時數（worklog）相關。如果是，請將使用者想要新增的工作時數資訊加入到 message 中。 如果沒有關聯, 也新增沒有關聯訊息到 message中"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        -1980,
+        660
+      ],
+      "id": "1feac9da-9f99-461b-9569-a7232e2936ae",
+      "name": "Basic LLM Chain",
+      "alwaysOutputData": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "# 分析來自 n8n Chat 或 Open WebUI (Webhook) 的 Jira 工作日誌用戶輸入意圖\n",
+        "height": 807,
+        "width": 1389
+      },
+      "id": "c9f991cd-af7e-4e35-969f-bcf822400f72",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2540,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# 生成 Jira REST API 格式，透過 Gmail 執行「HITL」流程，並發送 HTTP 請求以更新 Jira 工作日誌\n",
+        "height": 667,
+        "width": 1269,
+        "color": 4
+      },
+      "id": "c0bad04d-9134-4b6c-aec4-a6907e18cbec",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1120,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "ray7711231@gmail.com",
+        "subject": "Update Jira Worklog Approval Required",
+        "message": "=親愛的用戶，您好：\n\n您有一筆工時記錄待確認，請確認是否要將以下工時新增至 Jira：\n\"\"\"\n{{ $('Set Relevant').item.json.output.message }}\n\"\"\"\n若您有任何疑問，請回覆此郵件或聯繫系統管理員。  \n\n感謝您的確認！\n",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -620,
+        120
+      ],
+      "id": "6de971f9-1052-429e-9e09-36295541863b",
+      "name": "Gmail (Human in the loop)",
+      "webhookId": "d333a69a-9915-4406-99fc-a509d129af07",
+      "executeOnce": false,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "25N5tY6SsBfBYiZm",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n# 摘要 Jira 工作日誌請求資訊並回傳訊息給 Open WebUI\n",
+        "height": 507,
+        "width": 1269,
+        "color": 3
+      },
+      "id": "b9d43241-6bc2-4b31-a060-da53f1beed65",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1120,
+        700
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Relevance": {
+      "main": [
+        [
+          {
+            "node": "Set Relevant",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Not Relevant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent (Summary)",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent (Summary)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Not Relevant": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook (open-webui)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook (open-webui)": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Disapproval": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook (open-webui)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Gmail Approval": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request to Jira",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Disapproval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Success Info": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook (open-webui)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request to Jira": {
+      "main": [
+        [
+          {
+            "node": "Set Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain2": {
+      "main": [
+        [
+          {
+            "node": "Gmail (Human in the loop)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain2",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Relevant": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent (Summary)": {
+      "main": [
+        [
+          {
+            "node": "Set Success Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Summary": {
+      "main": [
+        [
+          {
+            "node": "AI Agent (Summary)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Check Relevance",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail (Human in the loop)": {
+      "main": [
+        [
+          {
+            "node": "Check Gmail Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "446dd607-59d8-4c4e-a0d8-c445085f1f6e",
+  "meta": {
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "id": "zON9yXM67241Rqfo",
+  "tags": []
+}

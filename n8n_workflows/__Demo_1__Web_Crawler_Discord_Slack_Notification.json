@@ -1,0 +1,361 @@
+{
+  "name": "*[Demo 1] 爬蟲股價 + Discord/Slack 推播",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        100,
+        120
+      ],
+      "id": "7decd195-0d37-430d-a0d8-c241b895c452",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://www.google.com/finance/quote/0050:TPE?sa=X&ved=2ahUKEwiWlM608N2LAxUig68BHTViGLUQ3ecFegQINRAf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        160
+      ],
+      "id": "ee606d27-8202-4fd1-97cd-44213bab5b3d",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "=Share Price",
+              "cssSelector": "div.VfPpkd-WsjYwc.VfPpkd-WsjYwc-OWXEXe-INsAgc.KC1dQ.Usd1Ac.AaN0Dd.QZMA8b > c-wiz > div > div:nth-child(1) > div > div.rPF6Lc > div > div:nth-child(1) > div > span > div > div",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        600,
+        160
+      ],
+      "id": "bed51668-0823-49ee-a766-615ea8d2b718",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        100,
+        280
+      ],
+      "id": "f15e2341-4bf5-4d03-b000-0aa1a721ca0a",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "content": "# 透過 HTTP Request 爬蟲\n",
+        "height": 507,
+        "width": 1049
+      },
+      "id": "c284d95b-9ebf-464a-b3de-e3527aa9330c",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Discord/Slack 推播內容\n",
+        "height": 507,
+        "width": 429,
+        "color": 5
+      },
+      "id": "971cd982-e228-4777-8d7b-7ca16f7eb0f2",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1060,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "96e3b314-d086-432e-b165-5ade4712d60f",
+              "name": "success",
+              "value": "={{ $json.success }}",
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1280,
+        160
+      ],
+      "id": "eb21b9a2-8872-418f-a561-81810640709d",
+      "name": "Discord Result"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "597cbdbf-f60a-4029-ad39-1fad68b61b45",
+              "name": "['Share Price'][0]",
+              "value": "={{ parseFloat($json[\"Share Price\"][0].replace(\"$\", \"\")) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        740,
+        160
+      ],
+      "id": "d3bd01c7-674e-4c67-8930-674a6a7e1d16",
+      "name": "Set Output Format"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b502cf15-566c-43e2-bb41-8f49ddf1cb0c",
+              "name": "thresholdValue ",
+              "value": 195,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        280,
+        160
+      ],
+      "id": "eb819d5f-dba3-4a40-a602-6dc4ad92b345",
+      "name": "Set Price Threshold"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d8c53c3e-a28e-46cf-acd7-9a3f0e9ad3c8",
+              "leftValue": "={{ $json['Share Price'][0] }}",
+              "rightValue": "={{ $('Set Price Threshold').item.json['thresholdValue '] }}",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        900,
+        160
+      ],
+      "id": "45db42c7-dcf6-4185-95ba-23fdd90f5dee",
+      "name": "Filter",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://hooks.slack.com/services/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",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"text\": \"0050 目前價格: {{ $('HTML').item.json['Share Price'][0] }}, 低於設定的門檻值 (${{ $('Set Price Threshold').item.json['thresholdValue '] }})\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1120,
+        280
+      ],
+      "id": "1ced9387-8a79-4223-a95a-16ee3e647c71",
+      "name": "HTTP Request_Slack Webhook"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=0050 目前價格: {{ $('HTML').item.json['Share Price'][0] }}, 低於設定的門檻值 (${{ $('Set Price Threshold').item.json['thresholdValue '] }})",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        100
+      ],
+      "id": "ad845cbf-e1af-451d-bd1e-d09a8dbc7c55",
+      "name": "Discord",
+      "webhookId": "2dfe330a-9185-403a-b014-83da294c0956",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "6RAmFHpCTEGG46Cg",
+          "name": "Discord Webhook account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Set Price Threshold",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Set Output Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Price Threshold",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Output Format": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Price Threshold": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request_Slack Webhook": {
+      "main": [
+        [
+          {
+            "node": "Discord Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Discord": {
+      "main": [
+        [
+          {
+            "node": "Discord Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5b9396ef-3b59-4321-b441-2328d24905b3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "id": "8sepH89sRo18Ee8e",
+  "tags": []
+}
