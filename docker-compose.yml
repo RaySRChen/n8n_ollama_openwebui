@@ -4,6 +4,7 @@ volumes:
   ollama_storage:
   qdrant_storage:
   open-webui:
+  n8n_logs:
 
 networks:
   demo:
@@ -26,6 +27,13 @@ x-n8n: &service-n8n
     - N8N_DEFAULT_TIMEZONE=Asia/Taipei
     - GENERIC_TIMEZONE=Asia/Taipei
     - TZ=Asia/Taipei
+    - N8N_FEATURES_ENABLED=featErrorWorkflow
+    - N8N_LOG_OUTPUT=console,file
+    - N8N_LOG_LEVEL=debug
+    # - N8N_LOG_FILE_LOCATION=/home/node/.n8n/logs
+    - N8N_LOG_FILE_LOCATION=/n8n_logs/logs
+    - N8N_LOG_FILE_MAXSIZE=50
+    - N8N_LOG_FILE_MAXCOUNT=60
 
 x-ollama: &service-ollama
   image: ollama/ollama:latest
@@ -93,7 +101,9 @@ services:
     ports:
       - 5678:5678
     volumes:
-      - n8n_storage:/home/node/.n8n
+      - ./n8n_storage:/home/node/.n8n
+      - n8n_logs:/n8n_logs/logs
+      # - n8n_logs:/home/node/.n8n/logs
       - ./n8n/backup:/backup
       - ./shared:/data/shared
     depends_on:
