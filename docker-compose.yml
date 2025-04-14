@@ -34,6 +34,7 @@ x-n8n: &service-n8n
     - N8N_LOG_FILE_LOCATION=/n8n_logs/logs
     - N8N_LOG_FILE_MAXSIZE=50
     - N8N_LOG_FILE_MAXCOUNT=60
+    - N8N_RUNNERS_ENABLED=true
 
 x-ollama: &service-ollama
   image: ollama/ollama:latest
