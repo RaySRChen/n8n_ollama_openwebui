@@ -35,8 +35,7 @@ x-n8n: &service-n8n
     - N8N_LOG_FILE_MAXSIZE=50
     - N8N_LOG_FILE_MAXCOUNT=60
     - N8N_RUNNERS_ENABLED=true
-    - N8N_SECURE_COOKIE=false
-    # - WEBHOOK_URL="http://172.22.123.221:5678/"
+    - WEBHOOK_URL="http://172.22.123.221:5678/"
 
 x-ollama: &service-ollama
   image: ollama/ollama:latest
@@ -72,6 +71,7 @@ services:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
       - POSTGRES_DB
+      - TZ=Asia/Taipei 
     volumes:
       - postgres_storage:/var/lib/postgresql/data
     ports:
